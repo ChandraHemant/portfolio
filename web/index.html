@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A new Flutter project.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="portfolio">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+
+  <title>Hemant Chandra</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Modern CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Variables */
+    :root {
+      --primary-color: #2563EB;
+      --secondary-color: #EF4444;
+      --background-color: #ffffff;
+      --text-color: #1E293B;
+      --dark-blue: #0F172A;
+      --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    /* Dark mode detection */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary-color: #60A5FA;
+        --background-color: #121827;
+        --text-color: #F1F5F9;
+      }
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-family: var(--font-family);
+      font-size: 16px;
+      line-height: 1.5;
+      transition: background-color 0.3s ease;
+      overflow: hidden;
+    }
+
+    .loader-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--background-color);
+      z-index: 9999;
+    }
+
+    .brand {
+      position: absolute;
+      top: 40px;
+      left: 40px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+      width: 60px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-weight: bold;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .brand-name {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .loader-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 600px;
+      padding: 0 20px;
+    }
+
+    .profile-image {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 24px;
+      border: 3px solid var(--primary-color);
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
+    }
+
+    .name {
+      font-size: 36px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .title {
+      font-size: 18px;
+      color: var(--primary-color);
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    .status-text {
+      margin-top: 40px;
+      font-size: 16px;
+      opacity: 0.7;
+    }
+
+    .progress-bar {
+      width: 200px;
+      height: 6px;
+      background-color: rgba(128, 128, 128, 0.2);
+      border-radius: 3px;
+      margin-top: 16px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    .pulse-container {
+      position: absolute;
+      bottom: 40px;
+      display: flex;
+      gap: 30px;
+    }
+
+    .technology {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.6;
+      transition: opacity 0.3s ease;
+    }
+
+    .technology:hover {
+      opacity: 1;
+    }
+
+    .tech-icon {
+      width: 32px;
+      height: 32px;
+      margin-bottom: 8px;
+    }
+
+    .tech-name {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* Floating objects animation */
+    .floating-object {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+      background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    }
+
+    .floating-object:nth-child(1) {
+      width: 100px;
+      height: 100px;
+      top: 15%;
+      left: 15%;
+      animation: float 15s infinite ease-in-out;
+    }
+
+    .floating-object:nth-child(2) {
+      width: 150px;
+      height: 150px;
+      bottom: 20%;
+      left: 10%;
+      animation: float 20s infinite ease-in-out reverse;
+    }
+
+    .floating-object:nth-child(3) {
+      width: 80px;
+      height: 80px;
+      top: 20%;
+      right: 15%;
+      animation: float 12s infinite ease-in-out 2s;
+    }
+
+    .floating-object:nth-child(4) {
+      width: 120px;
+      height: 120px;
+      bottom: 15%;
+      right: 10%;
+      animation: float 18s infinite ease-in-out 1s reverse;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0) translateX(0);
+      }
+      25% {
+        transform: translateY(-20px) translateX(10px);
+      }
+      50% {
+        transform: translateY(0) translateX(20px);
+      }
+      75% {
+        transform: translateY(20px) translateX(10px);
+      }
+    }
+
+    /* Pulse animation for loading indicator */
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7);
+      }
+      70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(37, 99, 235, 0);
+      }
+      100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+      }
+    }
+
+    /* Loading animation */
+    .loading-dots {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: var(--primary-color);
+      animation: dot-pulse 1.5s infinite ease-in-out;
+    }
+
+    .dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes dot-pulse {
+      0%, 100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .brand {
+        top: 20px;
+        left: 20px;
+      }
+
+      .logo {
+        width: 50px;
+        height: 34px;
+        font-size: 16px;
+      }
+
+      .brand-name {
+        font-size: 20px;
+      }
+
+      .profile-image {
+        width: 120px;
+        height: 120px;
+      }
+
+      .name {
+        font-size: 28px;
+      }
+
+      .title {
+        font-size: 16px;
+      }
+
+      .pulse-container {
+        bottom: 20px;
+        gap: 20px;
+      }
+
+      .tech-icon {
+        width: 24px;
+        height: 24px;
+      }
+
+      .tech-name {
+        font-size: 12px;
+      }
+
+      .floating-object {
+        opacity: 0.05;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Premium Loading UI -->
+<div class="loader-container" id="loader">
+  <!-- Background floating objects -->
+  <div class="floating-object"></div>
+  <div class="floating-object"></div>
+  <div class="floating-object"></div>
+  <div class="floating-object"></div>
+
+  <!-- Brand logo -->
+  <div class="brand">
+    <div class="logo">HTKC</div>
+  </div>
+
+  <!-- Main content -->
+  <div class="loader-content">
+    <img src="assets/images/profile.jpg" alt="Hemant Chandra" class="profile-image" id="profile-image" onerror="this.src='icons/Icon-192.png';">
+    <h1 class="name">Hemant Chandra</h1>
+    <h2 class="title">Senior Full Stack Developer</h2>
+    <p class="status-text" id="status-text">Loading Portfolio</p>
+    <div class="progress-bar">
+      <div class="progress-bar-inner" id="progress-bar"></div>
+    </div>
+    <div class="loading-dots">
+      <div class="dot"></div>
+      <div class="dot"></div>
+      <div class="dot"></div>
+    </div>
+  </div>
+
+  <!-- Technology icons -->
+  <div class="pulse-container">
+    <div class="technology">
+      <div class="tech-icon">
+        <svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor">
+          <path d="M14.314 0L2.3 12 6 15.7 21.684.013h-7.357L14.314 0zm.014 11.072l-6.471 6.457 6.47 6.47H21.7l-6.46-6.468 6.46-6.46h-7.371z"/>
+        </svg>
+      </div>
+      <div class="tech-name">Flutter</div>
+    </div>
+    <div class="technology">
+      <div class="tech-icon">
+        <svg viewBox="0 0 24 24" width="100%" height="100%" fill="currentColor">
+          <path d="M7.01 10.207h-.944l-.515 2.648h.838c.556 0 .97-.105 1.242-.314.272-.21.455-.559.55-1.049.092-.47.05-.802-.124-.995-.175-.193-.523-.29-1.047-.29zM12 5.688C5.373 5.688 0 8.514 0 12s5.373 6.313 12 6.313S24 15.486 24 12c0-3.486-5.373-6.312-12-6.312zm-3.26 7.451c-.261.25-.575.438-.917.551-.336.108-.765.164-1.285.164H5.357l-.327 1.681H3.652l1.23-6.326h2.65c.797 0 1.378.209 1.744.628.366.418.476 1.002.33 1.752a2.836 2.836 0 0 1-.305.847c-.143.255-.33.49-.561.703zm4.024.715l.543-2.799c.063-.318.039-.536-.068-.651-.107-.116-.336-.174-.687-.174H11.46l-.704 3.625H9.388l1.23-6.327h1.367l-.327 1.682h1.218c.767 0 1.295.134 1.586.401s.378.7.263 1.299l-.572 2.944h-1.389zm7.597-2.265a2.782 2.782 0 0 1-.305.847c-.143.255-.33.49-.561.703a2.44 2.44 0 0 1-.917.551c-.336.108-.765.164-1.286.164h-1.18l-.327 1.682h-1.378l1.23-6.326h2.649c.797 0 1.378.209 1.744.628.366.417.477 1.001.331 1.751zm-2.595-1.492h-.943l-.516 2.648h.838c.557 0 .971-.105 1.242-.314.272-.21.455-.559.551-1.049.092-.47.049-.802-.125-.995s-.524-.29-1.047-.29z"/>
+        </svg>
+      </div>
+      <div class="tech-name">Laravel</div>
+    </div>
+  </div>
+</div>
+
+<!-- Script to handle loading animation -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Get elements
+    const progressBar = document.getElementById('progress-bar');
+    const statusText = document.getElementById('status-text');
+    const loader = document.getElementById('loader');
+
+    // Set initial progress
+    let progress = 0;
+
+    // Update progress function
+    function updateProgress() {
+      // Simulate loading progress
+      if (progress < 100) {
+        progress += Math.random() * 15;
+        if (progress > 100) progress = 100;
+
+        // Update progress bar width
+        progressBar.style.width = progress + '%';
+
+        // Update status text based on progress
+        if (progress < 30) {
+          statusText.textContent = 'Loading resources...';
+        } else if (progress < 60) {
+          statusText.textContent = 'Initializing Flutter engine...';
+        } else if (progress < 90) {
+          statusText.textContent = 'Almost ready...';
+        } else {
+          statusText.textContent = 'Launching portfolio...';
+        }
+
+        // Continue until 100%
+        if (progress < 100) {
+          setTimeout(updateProgress, 500 + Math.random() * 1000);
+        } else {
+          // Hide loader when completed
+          setTimeout(function() {
+            loader.style.opacity = '0';
+            setTimeout(function() {
+              loader.style.display = 'none';
+            }, 500);
+          }, 500);
+        }
+      }
+    }
+
+    // Start progress animation
+    setTimeout(updateProgress, 500);
+  });
+
+  // Handle Flutter bootstrap
+  window.addEventListener('load', function() {
+    // Load Flutter
+    var scriptTag = document.createElement('script');
+    scriptTag.src = 'flutter.js';
+    scriptTag.type = 'application/javascript';
+    document.body.append(scriptTag);
+
+    scriptTag.addEventListener('load', function() {
+      _flutter.loader.load({
+        onEntrypointLoaded: async function(engineInitializer) {
+          let appRunner = await engineInitializer.initializeEngine();
+          await appRunner.runApp();
+        }
+      });
+    });
+  });
+</script>
+
+<script src="flutter_bootstrap.js" async></script>
+<!-- Original Flutter bootstrap script reference -->
+<!-- The script element below is replaced by our custom loading implementation -->
+<!-- <script src="flutter_bootstrap.js" async></script> -->
+</body>
+</html>
