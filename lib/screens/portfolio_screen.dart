@@ -6,8 +6,8 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:portfolio_app/config/responsive.dart';
-import 'package:printing/printing.dart';
 import 'package:portfolio_app/models/portfolio_data.dart';
+import 'package:universal_html/html.dart' as html;
 
 class PortfolioScreen extends StatefulWidget {
   const PortfolioScreen({Key? key}) : super(key: key);
@@ -1085,7 +1085,7 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         children: [
-          Icon(
+          const Icon(
             Icons.check_circle,
             color: Colors.green,
             size: 18,
@@ -1101,7 +1101,6 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
       ),
     );
   }
-
   Future<void> _generateResume() async {
     setState(() {
       isGeneratingResume = true;
@@ -1110,13 +1109,9 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
     try {
       final pdf = await _buildResumePdf();
 
-      // Platform-specific approach for different devices
+      // For web platform - use direct browser download instead of relying on printing plugin
       if (kIsWeb) {
-        // For web platform
-        await Printing.layoutPdf(
-          onLayout: (PdfPageFormat format) async => pdf,
-          name: '${data['name']}_Resume.pdf',
-        );
+        await _downloadPdfForWeb(pdf);
       } else {
         // For mobile/desktop platforms
         final output = await _savePdfToFile(pdf);
@@ -1149,6 +1144,34 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
         });
       }
     }
+  }
+
+// Web-specific method for direct download without using printing plugin
+  Future<void> _downloadPdfForWeb(Uint8List pdfBytes) async {
+    // Use dart:html for web-only functionality
+    // ignore: avoid_web_libraries_in_flutter
+
+    // Create a Blob from the PDF bytes
+    final blob = html.Blob([pdfBytes], 'application/pdf');
+
+    // Create a URL for the Blob
+    final url = html.Url.createObjectUrlFromBlob(blob);
+
+    // Create an anchor element with the URL
+    final anchor = html.AnchorElement()
+      ..href = url
+      ..style.display = 'none'
+      ..download = '${data['name'].toString().replaceAll(' ', '_')}_Resume.pdf';
+
+    // Add to document body
+    html.document.body?.children.add(anchor);
+
+    // Trigger click
+    anchor.click();
+
+    // Cleanup
+    html.document.body?.children.remove(anchor);
+    html.Url.revokeObjectUrl(url);
   }
 
   Future<File?> _savePdfToFile(Uint8List pdfBytes) async {
@@ -1539,8 +1562,6 @@ class _PortfolioScreenState extends State<PortfolioScreen> {
                           ),
                         );
                       }),
-
-
 
                       // Packages - More compact
                       pw.SizedBox(height: 8),
