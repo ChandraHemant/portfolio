@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio_app/config/app_router.dart';
+import 'package:portfolio_app/config/theme.dart';
+import 'package:portfolio_app/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
-import 'screens/home_screen.dart';
-import 'providers/theme_provider.dart';
-import 'config/theme.dart';
 
 void main() {
   runApp(
@@ -20,13 +20,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
 
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Hemant Chandra',
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
       themeMode: themeProvider.themeMode,
-      home: const HomeScreen(),
+      routerConfig: AppRouter.router,
     );
   }
 }

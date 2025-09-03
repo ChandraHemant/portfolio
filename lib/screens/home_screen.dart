@@ -1,140 +1,27 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:portfolio_app/screens/portfolio_screen.dart';
-import '../widgets/custom_app_bar.dart';
-import '../models/portfolio_data.dart';
-import '../config/responsive.dart';
-import 'about_screen.dart';
-import 'skills_screen.dart';
-import 'projects_screen.dart';
-import 'packages_screen.dart';
-import 'contact_screen.dart';
-import '../widgets/animated_section.dart';
+import 'package:go_router/go_router.dart';
+import 'package:portfolio_app/config/app_router.dart';
+import 'package:portfolio_app/config/responsive.dart';
+import 'package:portfolio_app/models/portfolio_data.dart';
+import 'package:portfolio_app/widgets/animated_section.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({Key? key}) : super(key: key);
-
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen>
-    with SingleTickerProviderStateMixin {
-  final PageController _pageController = PageController();
-  int _currentIndex = 0;
-
-  // Updated sections list to include Packages
-  final List<String> _sections = [
-    'Home',
-    'About',
-    'Skills',
-    'Projects',
-    'Packages',
-    'Contact',
-    'My Resume'
-  ];
-
-  late AnimationController _animationController;
-
-  @override
-  void initState() {
-    super.initState();
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 1200),
-    );
-
-    // Add a delay for initial animations
-    Future.delayed(const Duration(milliseconds: 300), () {
-      if (mounted) _animationController.forward();
-    });
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    _animationController.dispose();
-    super.dispose();
-  }
-
-  void _navigateToPage(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 800),
-      curve: Curves.easeInOutCubic,
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     final userData = PortfolioData.data;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Scaffold(
-      body: Column(
-        children: [
-          // Custom app bar with animated reveal
-          AnimatedBuilder(
-            animation: _animationController,
-            builder: (context, child) {
-              return Transform.translate(
-                offset: Offset(0, -50 * (1 - _animationController.value)),
-                child: Opacity(
-                  opacity: _animationController.value,
-                  child: CustomAppBar(
-                    onTap: _navigateToPage,
-                    selectedIndex: _currentIndex,
-                    sections: _sections,
-                  ),
-                ),
-              );
-            },
-          ),
-
-          // Main content area
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _buildHomeSection(context, userData),
-                const AboutScreen(),
-                const SkillsScreen(),
-                const ProjectsScreen(),
-                const PackagesScreen(), // Added the Packages screen
-                const ContactScreen(),
-                const PortfolioScreen(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHomeSection(
-      BuildContext context, Map<String, dynamic> userData) {
-    final isMobile = Responsive.isMobile(context);
-    final isTablet = Responsive.isTablet(context);
 
     return Responsive.responsiveLayout(
-      mobile: _buildMobileHomeLayout(userData),
-      tablet: _buildTabletHomeLayout(userData),
-      desktop: _buildDesktopHomeLayout(userData),
+      mobile: _buildMobileHomeLayout(context, userData),
+      tablet: _buildTabletHomeLayout(context, userData),
+      desktop: _buildDesktopHomeLayout(context, userData),
     );
   }
 
-  Widget _buildMobileHomeLayout(Map<String, dynamic> userData) {
+  Widget _buildMobileHomeLayout(BuildContext context, Map<String, dynamic> userData) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       child: Padding(
@@ -180,15 +67,15 @@ class _HomeScreenState extends State<HomeScreen>
                       ),
                     )
                         .animate(
-                          onPlay: (controller) =>
-                              controller.repeat(reverse: true),
-                        )
+                      onPlay: (controller) =>
+                          controller.repeat(reverse: true),
+                    )
                         .scale(
-                          begin: const Offset(1.0, 1.0),
-                          end: const Offset(1.05, 1.05),
-                          duration: 3000.ms,
-                          curve: Curves.easeInOut,
-                        ),
+                      begin: const Offset(1.0, 1.0),
+                      end: const Offset(1.05, 1.05),
+                      duration: 3000.ms,
+                      curve: Curves.easeInOut,
+                    ),
 
                     // Image
                     CircleAvatar(
@@ -212,9 +99,9 @@ class _HomeScreenState extends State<HomeScreen>
               child: Text(
                 userData['name'],
                 style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -278,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen>
               child: Column(
                 children: [
                   ElevatedButton.icon(
-                    onPressed: () => _navigateToPage(3), // Navigate to Projects
+                    onPressed: () => context.go(AppRouter.projects),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 16),
@@ -293,20 +180,20 @@ class _HomeScreenState extends State<HomeScreen>
                     ),
                   )
                       .animate(
-                        onPlay: (controller) =>
-                            controller.repeat(reverse: true),
-                      )
+                    onPlay: (controller) =>
+                        controller.repeat(reverse: true),
+                  )
                       .tint(
-                        color: Theme.of(context).primaryColor.withOpacity(0.2),
-                        duration: 2000.ms,
-                        curve: Curves.easeInOut,
-                      ),
+                    color: Theme.of(context).primaryColor.withOpacity(0.2),
+                    duration: 2000.ms,
+                    curve: Curves.easeInOut,
+                  ),
 
                   const SizedBox(height: 15),
 
                   // New Packages button
                   OutlinedButton.icon(
-                    onPressed: () => _navigateToPage(4), // Navigate to Packages
+                    onPressed: () => context.go(AppRouter.packages),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 16),
@@ -327,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen>
 
                   // Contact button
                   OutlinedButton.icon(
-                    onPressed: () => _navigateToPage(5), // Navigate to Contact
+                    onPressed: () => context.go(AppRouter.contact),
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(
                           horizontal: 30, vertical: 16),
@@ -358,7 +245,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildTabletHomeLayout(Map<String, dynamic> userData) {
+  Widget _buildTabletHomeLayout(BuildContext context, Map<String, dynamic> userData) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return SingleChildScrollView(
       child: Container(
@@ -412,11 +299,11 @@ class _HomeScreenState extends State<HomeScreen>
                     child: Text(
                       userData['name'],
                       style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                            fontSize: 50,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                            height: 1.1,
-                          ),
+                        fontSize: 50,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                        height: 1.1,
+                      ),
                     ),
                   ),
 
@@ -435,7 +322,7 @@ class _HomeScreenState extends State<HomeScreen>
                         borderRadius: BorderRadius.circular(30),
                         border: Border.all(
                           color:
-                              Theme.of(context).primaryColor.withOpacity(0.3),
+                          Theme.of(context).primaryColor.withOpacity(0.3),
                           width: 1.5,
                         ),
                       ),
@@ -481,8 +368,7 @@ class _HomeScreenState extends State<HomeScreen>
                       children: [
                         // Primary CTA
                         ElevatedButton.icon(
-                          onPressed: () => _navigateToPage(3),
-                          // Navigate to Projects
+                          onPressed: () => context.go(AppRouter.projects),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 24, vertical: 16),
@@ -498,23 +384,22 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         )
                             .animate(
-                              onPlay: (controller) =>
-                                  controller.repeat(reverse: true),
-                            )
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                        )
                             .tint(
-                              color: Theme.of(context)
-                                  .primaryColor
-                                  .withOpacity(0.2),
-                              duration: 2000.ms,
-                              curve: Curves.easeInOut,
-                            ),
+                          color: Theme.of(context)
+                              .primaryColor
+                              .withOpacity(0.2),
+                          duration: 2000.ms,
+                          curve: Curves.easeInOut,
+                        ),
 
                         const SizedBox(width: 16),
 
                         // New Packages CTA
                         OutlinedButton.icon(
-                          onPressed: () => _navigateToPage(4),
-                          // Navigate to Packages
+                          onPressed: () => context.go(AppRouter.packages),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 16),
@@ -540,8 +425,7 @@ class _HomeScreenState extends State<HomeScreen>
 
                         // Contact button
                         OutlinedButton.icon(
-                          onPressed: () => _navigateToPage(5),
-                          // Navigate to Contact
+                          onPressed: () => context.go(AppRouter.contact),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 24, vertical: 16),
@@ -583,7 +467,7 @@ class _HomeScreenState extends State<HomeScreen>
                       boxShadow: [
                         BoxShadow(
                           color:
-                              Theme.of(context).primaryColor.withOpacity(0.25),
+                          Theme.of(context).primaryColor.withOpacity(0.25),
                           blurRadius: 40,
                           spreadRadius: 4,
                           offset: const Offset(0, 15),
@@ -611,15 +495,15 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         )
                             .animate(
-                              onPlay: (controller) =>
-                                  controller.repeat(reverse: true),
-                            )
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                        )
                             .scale(
-                              begin: const Offset(1.0, 1.0),
-                              end: const Offset(1.05, 1.05),
-                              duration: 3000.ms,
-                              curve: Curves.easeInOut,
-                            ),
+                          begin: const Offset(1.0, 1.0),
+                          end: const Offset(1.05, 1.05),
+                          duration: 3000.ms,
+                          curve: Curves.easeInOut,
+                        ),
 
                         // White inner circle
                         Container(
@@ -651,15 +535,15 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           )
                               .animate(
-                                onPlay: (controller) =>
-                                    controller.repeat(reverse: true),
-                              )
+                            onPlay: (controller) =>
+                                controller.repeat(reverse: true),
+                          )
                               .moveY(
-                                begin: 0,
-                                end: 15,
-                                duration: 2000.ms,
-                                curve: Curves.easeInOut,
-                              )
+                            begin: 0,
+                            end: 15,
+                            duration: 2000.ms,
+                            curve: Curves.easeInOut,
+                          )
                               .fadeIn(duration: 500.ms)
                               .fadeOut(delay: 1500.ms),
                         ),
@@ -676,15 +560,15 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           )
                               .animate(
-                                onPlay: (controller) =>
-                                    controller.repeat(reverse: true),
-                              )
+                            onPlay: (controller) =>
+                                controller.repeat(reverse: true),
+                          )
                               .moveY(
-                                begin: 0,
-                                end: -20,
-                                duration: 2500.ms,
-                                curve: Curves.easeInOut,
-                              )
+                            begin: 0,
+                            end: -20,
+                            duration: 2500.ms,
+                            curve: Curves.easeInOut,
+                          )
                               .fadeIn(duration: 500.ms)
                               .fadeOut(delay: 2000.ms),
                         ),
@@ -700,7 +584,7 @@ class _HomeScreenState extends State<HomeScreen>
     );
   }
 
-  Widget _buildDesktopHomeLayout(Map<String, dynamic> userData) {
+  Widget _buildDesktopHomeLayout(BuildContext context, Map<String, dynamic> userData) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // Updated desktop layout with Packages navigation
     return SingleChildScrollView(
@@ -755,11 +639,11 @@ class _HomeScreenState extends State<HomeScreen>
                     child: Text(
                       userData['name'],
                       style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                            fontSize: 65,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: -0.5,
-                            height: 1.1,
-                          ),
+                        fontSize: 65,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: -0.5,
+                        height: 1.1,
+                      ),
                     ),
                   ),
 
@@ -778,7 +662,7 @@ class _HomeScreenState extends State<HomeScreen>
                         borderRadius: BorderRadius.circular(30),
                         border: Border.all(
                           color:
-                              Theme.of(context).primaryColor.withOpacity(0.3),
+                          Theme.of(context).primaryColor.withOpacity(0.3),
                           width: 1.5,
                         ),
                       ),
@@ -824,7 +708,7 @@ class _HomeScreenState extends State<HomeScreen>
                       children: [
                         // Primary CTA - Projects
                         ElevatedButton.icon(
-                          onPressed: () => _navigateToPage(3),
+                          onPressed: () => context.go(AppRouter.projects),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 30, vertical: 18),
@@ -840,23 +724,22 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         )
                             .animate(
-                              onPlay: (controller) =>
-                                  controller.repeat(reverse: true),
-                            )
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                        )
                             .tint(
-                              color: Theme.of(context)
-                                  .primaryColor
-                                  .withOpacity(0.2),
-                              duration: 2000.ms,
-                              curve: Curves.easeInOut,
-                            ),
+                          color: Theme.of(context)
+                              .primaryColor
+                              .withOpacity(0.2),
+                          duration: 2000.ms,
+                          curve: Curves.easeInOut,
+                        ),
 
                         const SizedBox(width: 20),
 
                         // Packages CTA
                         OutlinedButton.icon(
-                          onPressed: () => _navigateToPage(4),
-                          // Navigate to Packages
+                          onPressed: () => context.go(AppRouter.packages),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 30, vertical: 18),
@@ -882,8 +765,7 @@ class _HomeScreenState extends State<HomeScreen>
 
                         // Contact CTA
                         OutlinedButton.icon(
-                          onPressed: () => _navigateToPage(5),
-                          // Navigate to Contact
+                          onPressed: () => context.go(AppRouter.contact),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 30, vertical: 18),
@@ -925,7 +807,7 @@ class _HomeScreenState extends State<HomeScreen>
                       boxShadow: [
                         BoxShadow(
                           color:
-                              Theme.of(context).primaryColor.withOpacity(0.25),
+                          Theme.of(context).primaryColor.withOpacity(0.25),
                           blurRadius: 50,
                           spreadRadius: 5,
                           offset: const Offset(0, 15),
@@ -953,15 +835,15 @@ class _HomeScreenState extends State<HomeScreen>
                           ),
                         )
                             .animate(
-                              onPlay: (controller) =>
-                                  controller.repeat(reverse: true),
-                            )
+                          onPlay: (controller) =>
+                              controller.repeat(reverse: true),
+                        )
                             .scale(
-                              begin: const Offset(1.0, 1.0),
-                              end: const Offset(1.05, 1.05),
-                              duration: 3000.ms,
-                              curve: Curves.easeInOut,
-                            ),
+                          begin: const Offset(1.0, 1.0),
+                          end: const Offset(1.05, 1.05),
+                          duration: 3000.ms,
+                          curve: Curves.easeInOut,
+                        ),
 
                         // White inner circle
                         Container(
@@ -994,15 +876,15 @@ class _HomeScreenState extends State<HomeScreen>
                           )
                               .animate()
                               .animate(
-                                onPlay: (controller) =>
-                                    controller.repeat(reverse: true),
-                              )
+                            onPlay: (controller) =>
+                                controller.repeat(reverse: true),
+                          )
                               .moveY(
-                                begin: 0,
-                                end: 20,
-                                duration: 2000.ms,
-                                curve: Curves.easeInOut,
-                              )
+                            begin: 0,
+                            end: 20,
+                            duration: 2000.ms,
+                            curve: Curves.easeInOut,
+                          )
                               .fadeIn(duration: 500.ms)
                               .fadeOut(delay: 1500.ms),
                         ),
@@ -1019,15 +901,15 @@ class _HomeScreenState extends State<HomeScreen>
                             ),
                           )
                               .animate(
-                                onPlay: (controller) =>
-                                    controller.repeat(reverse: true),
-                              )
+                            onPlay: (controller) =>
+                                controller.repeat(reverse: true),
+                          )
                               .moveY(
-                                begin: 0,
-                                end: -30,
-                                duration: 2500.ms,
-                                curve: Curves.easeInOut,
-                              )
+                            begin: 0,
+                            end: -30,
+                            duration: 2500.ms,
+                            curve: Curves.easeInOut,
+                          )
                               .fadeIn(duration: 500.ms)
                               .fadeOut(delay: 2000.ms),
                         ),
