@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
 class SkillCard extends StatefulWidget {
@@ -31,7 +32,7 @@ class _SkillCardState extends State<SkillCard> with SingleTickerProviderStateMix
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1000),
     );
 
     _progressAnimation = Tween<double>(
@@ -39,11 +40,10 @@ class _SkillCardState extends State<SkillCard> with SingleTickerProviderStateMix
       end: widget.level,
     ).animate(CurvedAnimation(
       parent: _controller,
-      curve: Interval(0.2, 1.0, curve: Curves.easeOutCubic),
+      curve: Curves.easeOutQuart,
     ));
 
-    // Auto start animation with a slight delay based on index
-    Future.delayed(Duration(milliseconds: 500 + (widget.index * 100)), () {
+    Future.delayed(Duration(milliseconds: 200 + (widget.index * 60)), () {
       if (mounted) _controller.forward();
     });
   }
@@ -56,221 +56,179 @@ class _SkillCardState extends State<SkillCard> with SingleTickerProviderStateMix
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final cardBg = isDark 
+        ? Colors.white.withOpacity(0.04) 
+        : Colors.black.withOpacity(0.03);
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(24),
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: _isHovered
-              ? Theme.of(context).primaryColor.withOpacity(0.05)
-              : Theme.of(context).colorScheme.background,
-          borderRadius: BorderRadius.circular(24),
+              ? theme.primaryColor.withOpacity(0.06)
+              : cardBg,
+          borderRadius: BorderRadius.circular(20),
           boxShadow: [
-            BoxShadow(
-              color: _isHovered
-                  ? Theme.of(context).primaryColor.withOpacity(0.2)
-                  : Colors.black.withOpacity(0.05),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
+            if (_isHovered)
+              BoxShadow(
+                color: theme.primaryColor.withOpacity(0.12),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
           ],
           border: Border.all(
             color: _isHovered
-                ? Theme.of(context).primaryColor.withOpacity(0.3)
-                : Colors.transparent,
+                ? theme.primaryColor.withOpacity(0.3)
+                : (isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08)),
             width: 1.5,
           ),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Icon and name row
             Row(
               children: [
-                // Animated icon container
                 AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  padding: const EdgeInsets.all(12),
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: _isHovered
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(16),
+                        ? theme.primaryColor
+                        : theme.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     _getIconData(widget.icon),
                     color: _isHovered
                         ? Colors.white
-                        : Theme.of(context).primaryColor,
-                    size: 24,
+                        : theme.primaryColor,
+                    size: 20,
                   ),
                 ).animate(target: _isHovered ? 1 : 0)
-                    .rotate(duration: 400.ms, begin: 0, end: 0.05)
-                    .then(delay: 200.ms)
-                    .rotate(duration: 400.ms, begin: 0.05, end: -0.05)
-                    .then(delay: 200.ms)
-                    .rotate(duration: 400.ms, begin: -0.05, end: 0),
+                 .rotate(duration: 300.ms, begin: 0, end: 0.05)
+                 .then()
+                 .rotate(duration: 300.ms, begin: 0.05, end: 0),
                 const SizedBox(width: 16),
-
-                // Skill name with animated color
+                
                 Text(
                   widget.name,
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: _isHovered
-                        ? Theme.of(context).primaryColor
-                        : Theme.of(context).textTheme.displayMedium!.color,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : Colors.black,
                   ),
                 ),
               ],
             ),
-
-            const SizedBox(height: 24),
-
-            // Animated progress bar
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final width = constraints.maxWidth;
-
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Progress bar container
-                    Container(
-                      height: 10,
-                      width: width,
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).dividerColor.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: AnimatedBuilder(
-                        animation: _controller,
-                        builder: (context, child) {
-                          return Stack(
-                            children: [
-                              // Main progress fill
-                              Container(
-                                height: 10,
-                                width: width * _progressAnimation.value,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Theme.of(context).primaryColor,
-                                      Theme.of(context).primaryColor.withOpacity(0.8),
-                                    ],
-                                    begin: Alignment.centerLeft,
-                                    end: Alignment.centerRight,
-                                  ),
-                                  borderRadius: BorderRadius.circular(5),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Theme.of(context).primaryColor.withOpacity(0.3),
-                                      blurRadius: 6,
-                                      offset: const Offset(0, 3),
-                                    ),
+            
+            const SizedBox(height: 18),
+            
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Custom progress bar indicator
+                Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(3),
+                  ),
+                  child: AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return Row(
+                        children: [
+                          Expanded(
+                            flex: (_progressAnimation.value * 1000).toInt(),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    theme.primaryColor,
+                                    theme.colorScheme.secondary,
                                   ],
                                 ),
+                                borderRadius: BorderRadius.circular(3),
                               ),
-
-                              // Animated shine effect
-                              if (_progressAnimation.value > 0.2)
-                                Positioned(
-                                  left: (width * _progressAnimation.value) - 20,
-                                  child: Container(
-                                    height: 10,
-                                    width: 20,
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.white.withOpacity(0.0),
-                                          Colors.white.withOpacity(0.5),
-                                          Colors.white.withOpacity(0.0),
-                                        ],
-                                        begin: Alignment.centerLeft,
-                                        end: Alignment.centerRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(5),
-                                    ),
-                                  ).animate(
-                                    onPlay: (controller) => controller.repeat(),
-                                  ).moveX(
-                                    begin: -20,
-                                    end: 40,
-                                    duration: 1500.ms,
-                                    curve: Curves.easeInOut,
-                                  ),
-                                ),
-                            ],
-                          );
-                        },
+                            ),
+                          ),
+                          Expanded(
+                            flex: ((1.0 - _progressAnimation.value) * 1000).toInt(),
+                            child: const SizedBox(),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                
+                const SizedBox(height: 10),
+                
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Proficiency',
+                      style: GoogleFonts.inter(
+                        fontSize: 12,
+                        color: isDark ? Colors.white.withOpacity(0.5) : Colors.black.withOpacity(0.5),
                       ),
                     ),
-
-                    const SizedBox(height: 12),
-
-                    // Percentage indicator
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Proficiency',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.7),
+                    AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, child) {
+                        return Text(
+                          '${(_progressAnimation.value * 100).toInt()}%',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: theme.primaryColor,
                           ),
-                        ),
-                        AnimatedBuilder(
-                          animation: _controller,
-                          builder: (context, child) {
-                            return Text(
-                              '${(_progressAnimation.value * 100).toInt()}%',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Theme.of(context).primaryColor,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ],
-                );
-              },
+                ),
+              ],
             ),
           ],
         ),
       ),
-    );
+    ).animate()
+     .fadeIn(duration: 400.ms, delay: Duration(milliseconds: widget.index * 50))
+     .slideY(begin: 0.1, end: 0, duration: 400.ms, curve: Curves.easeOutQuad);
   }
 
   IconData _getIconData(String iconName) {
     switch (iconName.toLowerCase()) {
       case 'flutter':
-        return Icons.flutter_dash;
+        return Icons.flutter_dash_rounded;
       case 'dart':
-        return Icons.code;
+        return Icons.code_rounded;
       case 'firebase':
-        return Icons.whatshot;
+        return Icons.whatshot_rounded;
       case 'php':
-        return Icons.php;
+        return Icons.terminal_rounded;
       case 'javascript':
-        return Icons.javascript;
+        return Icons.javascript_rounded;
       case 'html':
-        return Icons.html;
+        return Icons.html_rounded;
       case 'database':
-        return Icons.storage;
+        return Icons.storage_rounded;
       case 'api':
-        return Icons.api;
+        return Icons.api_rounded;
       case 'web':
-        return Icons.web;
+        return Icons.language_rounded;
       case 'code':
-        return Icons.code;
+        return Icons.code_rounded;
       default:
-        return Icons.code;
+        return Icons.star_rounded;
     }
   }
 }

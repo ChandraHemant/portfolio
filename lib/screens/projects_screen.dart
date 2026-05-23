@@ -1,224 +1,217 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import '../models/portfolio_data.dart';
-import '../widgets/project_card.dart';
-import '../widgets/animated_section.dart';
-import '../config/responsive.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:portfolio_app/config/responsive.dart';
+import 'package:portfolio_app/config/theme.dart';
+import 'package:portfolio_app/models/portfolio_data.dart';
+import 'package:portfolio_app/widgets/project_card.dart';
+import 'package:portfolio_app/widgets/reveal_on_scroll.dart';
+import 'package:portfolio_app/widgets/mouse_tilt.dart';
 
-class ProjectsScreen extends StatelessWidget {
-  const ProjectsScreen({Key? key}) : super(key: key);
+class ProjectsScreen extends StatefulWidget {
+  final ScrollController? scrollController;
+  const ProjectsScreen({Key? key, this.scrollController}) : super(key: key);
+
+  @override
+  State<ProjectsScreen> createState() => _ProjectsScreenState();
+}
+
+class _ProjectsScreenState extends State<ProjectsScreen> {
+  String _filter = 'All';
+
+  static const _filters = [
+    'All', 'Flutter', 'GIS', 'Next.js', 'AI/ML', 'Government', 'Laravel',
+  ];
+
+  // Cases for the case studies section
+  static final _cases = [
+    {
+      'title': 'Global E-Commerce Scaling',
+      'client': 'RetailX',
+      'challenge': 'The client\'s legacy monolithic architecture was crashing under heavy traffic during holiday sales, resulting in millions of dollars in lost revenue. They needed a highly scalable, zero-downtime microservices architecture.',
+      'solution': 'We migrated their entire backend to a Node.js and Go-based microservices architecture deployed on Kubernetes. We implemented aggressive Redis caching, PostgreSQL read replicas, and a brand new Next.js frontend.',
+      'result': '300% increase in checkout speed, 99.999% uptime during Black Friday, and a 45% increase in conversion rates.',
+      'color': AppColors.accentPurple,
+    },
+    {
+      'title': 'AI-Powered Health Analytics',
+      'client': 'MedTech Innovators',
+      'challenge': 'They required a secure, HIPAA-compliant mobile application that could analyze patient data in real-time and predict potential health risks using complex machine learning models.',
+      'solution': 'We built a secure Flutter application with end-to-end encryption. The backend leveraged Python for ML processing, deployed securely on AWS GovCloud. Real-time data was managed via WebSocket connections.',
+      'result': 'Successfully launched in 50+ hospitals. The predictive model achieved a 92% accuracy rate in early detection of anomalies.',
+      'color': AppColors.accentCyan,
+    },
+  ];
 
   @override
   Widget build(BuildContext context) {
     final userData = PortfolioData.data;
-    final projects = userData['projects'] as List<dynamic>;
+    final allProjects = userData['projects'] as List<dynamic>;
     final isMobile = Responsive.isMobile(context);
     final isTablet = Responsive.isTablet(context);
 
-    return Responsive.responsiveLayout(
-      mobile: _buildMobileLayout(context, projects),
-      tablet: _buildTabletLayout(context, projects),
-      desktop: _buildDesktopLayout(context, projects),
-    );
-  }
+    // Apply category filtering logic
+    final filteredProjects = _filter == 'All'
+        ? allProjects
+        : allProjects.where((p) {
+            final category = (p['category'] ?? '').toString().toLowerCase();
+            return category.contains(_filter.toLowerCase());
+          }).toList();
 
-  Widget _buildMobileLayout(BuildContext context, List<dynamic> projects) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          AnimatedSection(
-            id: 'projects-title-mobile',
-            child: Text(
-              'My Projects',
-              style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          controller: widget.scrollController,
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : (isTablet ? 40 : 100),
+            vertical: 40,
           ),
-          const SizedBox(height: 10),
-          AnimatedSection(
-            id: 'projects-subtitle-mobile',
-            duration: const Duration(milliseconds: 1000),
-            child: Container(
-              height: 4,
-              width: 60,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(2),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Title
+              Text(
+                'Projects & Case Studies',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: isMobile ? 32 : 44,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1.0,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+              ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.1, end: 0),
+
+              const SizedBox(height: 10),
+
+              Container(
+                height: 4,
+                width: 60,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: AppColors.premiumGrad,
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ).animate().fadeIn(duration: 500.ms, delay: 100.ms),
+
+              const SizedBox(height: 20),
+
+              Text(
+                'A showcases of government geo-intelligence platforms, microservice APIs, and consumer mobile apps shipped.',
+                style: GoogleFonts.inter(
+                  fontSize: isMobile ? 14 : 16,
+                  height: 1.6,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.6)
+                      : Colors.black.withOpacity(0.6),
+                ),
+              ).animate().fadeIn(duration: 500.ms, delay: 200.ms),
+
+              const SizedBox(height: 32),
+
+              // Filter Tabs bar
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: _filters.map((f) {
+                    final active = _filter == f;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _filter = f),
+                        child: MouseRegion(
+                          cursor: SystemMouseCursors.click,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: active
+                                  ? Theme.of(context).primaryColor.withOpacity(0.12)
+                                  : (Theme.of(context).brightness == Brightness.dark
+                                      ? Colors.white.withOpacity(0.04)
+                                      : Colors.black.withOpacity(0.03)),
+                              borderRadius: BorderRadius.circular(30),
+                              border: Border.all(
+                                color: active
+                                    ? Theme.of(context).primaryColor
+                                    : Colors.transparent,
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Text(
+                              f,
+                              style: GoogleFonts.plusJakartaSans(
+                                color: active
+                                    ? Theme.of(context).primaryColor
+                                    : (Theme.of(context).brightness == Brightness.dark
+                                        ? Colors.white.withOpacity(0.6)
+                                        : Colors.black.withOpacity(0.6)),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ).animate().fadeIn(duration: 500.ms, delay: 300.ms),
+
+              const SizedBox(height: 40),
+
+              // Projects Grid
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: MasonryGridView.count(
+                  key: ValueKey(_filter),
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisCount: isMobile ? 1 : (isTablet ? 2 : 3),
+                  mainAxisSpacing: 20,
+                  crossAxisSpacing: 20,
+                  itemCount: filteredProjects.length,
+                  itemBuilder: (context, index) {
+                    final p = filteredProjects[index];
+                    return RevealOnScroll(
+                      duration: const Duration(milliseconds: 400),
+                      delay: Duration(milliseconds: 50 * (index % (isTablet ? 2 : 3))),
+                      slideFrom: const Offset(0, 20),
+                      child: ProjectCard(
+                        title: p['title'],
+                        description: p['description'] ?? p['desc'],
+                        technologies: List<String>.from(p['technologies']),
+                        url: p['url'],
+                        year: p['year'],
+                        color: p['color'],
+                        icon: p['icon'],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-          ),
-          const SizedBox(height: 30),
-          ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: projects.length,
-            itemBuilder: (context, index) {
-              final project = projects[index];
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 20),
-                child: AnimatedSection(
-                  id: 'project-mobile-$index',
-                  duration: Duration(milliseconds: 1200 + (index * 200)),
-                  startOffset: 50,
-                  child: ProjectCard(
-                    title: project['title'],
-                    description: project['description'],
-                    imageUrl: project['imageUrl'],
-                    technologies: List<String>.from(project['technologies']),
-                    url: project['url'],
+
+              const SizedBox(height: 32),
+
+              Center(
+                child: Text(
+                  '${allProjects.length} products shipped · and counting...',
+                  style: GoogleFonts.plusJakartaSans(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.4)
+                        : Colors.black.withOpacity(0.4),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
-              );
-            },
-          ),
-          const SizedBox(height: 30),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTabletLayout(BuildContext context, List<dynamic> projects) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(30),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 30),
-          AnimatedSection(
-            id: 'projects-title-tablet',
-            child: Text(
-              'My Projects',
-              style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
               ),
-            ),
+            ],
           ),
-          const SizedBox(height: 12),
-          AnimatedSection(
-            id: 'projects-subtitle-tablet',
-            duration: const Duration(milliseconds: 1000),
-            child: Container(
-              height: 4,
-              width: 70,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          AnimatedSection(
-            id: 'projects-description-tablet',
-            duration: const Duration(milliseconds: 1100),
-            child: Text(
-              'Check out some of my recent work:',
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
-              ),
-            ),
-          ),
-          const SizedBox(height: 40),
-          MasonryGridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 2,  // 2 columns for tablet view
-            crossAxisSpacing: 20,
-            mainAxisSpacing: 20,
-            itemCount: projects.length,
-            itemBuilder: (context, index) {
-              final project = projects[index];
-              return AnimatedSection(
-                id: 'project-tablet-$index',
-                duration: Duration(milliseconds: 1200 + (index * 200)),
-                startOffset: 50,
-                child: ProjectCard(
-                  title: project['title'],
-                  description: project['description'],
-                  imageUrl: project['imageUrl'],
-                  technologies: List<String>.from(project['technologies']),
-                  url: project['url'],
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDesktopLayout(BuildContext context, List<dynamic> projects) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 60),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AnimatedSection(
-            id: 'projects-title-desktop',
-            child: Text(
-              'My Projects',
-              style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          AnimatedSection(
-            id: 'projects-subtitle-desktop',
-            duration: const Duration(milliseconds: 1000),
-            child: Container(
-              height: 5,
-              width: 80,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(2.5),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          AnimatedSection(
-            id: 'projects-description-desktop',
-            duration: const Duration(milliseconds: 1100),
-            child: Text(
-              'Check out some of my recent work:',
-              style: TextStyle(
-                fontSize: 18,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
-              ),
-            ),
-          ),
-          const SizedBox(height: 40),
-          MasonryGridView.count(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 3,
-            mainAxisSpacing: 30,
-            crossAxisSpacing: 30,
-            itemCount: projects.length,
-            itemBuilder: (context, index) {
-              final project = projects[index];
-              return AnimatedSection(
-                id: 'project-desktop-$index',
-                duration: Duration(milliseconds: 1200 + (index * 200)),
-                startOffset: 50,
-                child: ProjectCard(
-                  title: project['title'],
-                  description: project['description'],
-                  imageUrl: project['imageUrl'],
-                  technologies: List<String>.from(project['technologies']),
-                  url: project['url'],
-                ),
-              );
-            },
-          ),
-        ],
+        ),
       ),
     );
   }

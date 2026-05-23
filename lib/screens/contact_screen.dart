@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
-import '../models/portfolio_data.dart';
-import '../widgets/animated_section.dart';
-import '../widgets/social_button.dart';
-import '../config/responsive.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:portfolio_app/config/responsive.dart';
+import 'package:portfolio_app/models/portfolio_data.dart';
+import 'package:portfolio_app/widgets/social_button.dart';
 
 class ContactScreen extends StatefulWidget {
-  const ContactScreen({Key? key}) : super(key: key);
+  final ScrollController? scrollController;
+  const ContactScreen({Key? key, this.scrollController}) : super(key: key);
 
   @override
   State<ContactScreen> createState() => _ContactScreenState();
@@ -33,399 +35,201 @@ class _ContactScreenState extends State<ContactScreen> {
     final isMobile = Responsive.isMobile(context);
     final isTablet = Responsive.isTablet(context);
 
-    return Responsive.responsiveLayout(
-      mobile: _buildMobileLayout(context, userData, socials),
-      tablet: _buildTabletLayout(context, userData, socials),  // Added tablet layout
-      desktop: _buildDesktopLayout(context, userData, socials),
-    );
-  }
-
-  Widget _buildMobileLayout(BuildContext context, Map<String, dynamic> userData, List<dynamic> socials) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          AnimatedSection(
-            id: 'contact-title-mobile',
-            child: Text(
-              'Get In Touch',
-              style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          controller: widget.scrollController,
+          padding: EdgeInsets.symmetric(
+            horizontal: isMobile ? 20 : (isTablet ? 40 : 100),
+            vertical: 40,
           ),
-          const SizedBox(height: 10),
-          AnimatedSection(
-            id: 'contact-subtitle-mobile',
-            duration: const Duration(milliseconds: 1000),
-            child: Container(
-              height: 4,
-              width: 60,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 30),
-          AnimatedSection(
-            id: 'contact-info-mobile',
-            duration: const Duration(milliseconds: 1200),
-            child: _buildContactInfo(context, userData, isMobile: true),
-          ),
-          const SizedBox(height: 20),
-          AnimatedSection(
-            id: 'contact-social-mobile',
-            duration: const Duration(milliseconds: 1400),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Connect With Me',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).textTheme.displayMedium!.color,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Title
+              Text(
+                'Get In Touch',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: isMobile ? 32 : 44,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -1.0,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white
+                      : Colors.black,
+                ),
+              ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.1, end: 0),
+              
+              const SizedBox(height: 10),
+              
+              Container(
+                height: 4,
+                width: 60,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Theme.of(context).primaryColor, Theme.of(context).colorScheme.secondary],
                   ),
+                  borderRadius: BorderRadius.circular(2),
                 ),
-                const SizedBox(height: 15),
-                Wrap(
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: socials.map((social) {
-                    return SocialButton(
-                      name: social['name'],
-                      url: social['url'],
-                      icon: social['icon'],
-                    );
-                  }).toList(),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 30),
-          AnimatedSection(
-            id: 'contact-form-mobile',
-            duration: const Duration(milliseconds: 1600),
-            child: _buildContactForm(context),
-          ),
-          const SizedBox(height: 30),
-        ],
-      ),
-    );
-  }
+              ).animate().fadeIn(duration: 500.ms, delay: 100.ms),
 
-  // New tablet layout implementation
-  Widget _buildTabletLayout(BuildContext context, Map<String, dynamic> userData, List<dynamic> socials) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AnimatedSection(
-            id: 'contact-title-tablet',
-            child: Text(
-              'Get In Touch',
-              style: Theme.of(context).textTheme.displayMedium!.copyWith(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          AnimatedSection(
-            id: 'contact-subtitle-tablet',
-            duration: const Duration(milliseconds: 1000),
-            child: Container(
-              height: 4,
-              width: 70,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          AnimatedSection(
-            id: 'contact-description-tablet',
-            duration: const Duration(milliseconds: 1100),
-            child: Text(
-              'Feel free to contact me for any work inquiries or collaborations.',
-              style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
-              ),
-            ),
-          ),
-          const SizedBox(height: 40),
+              const SizedBox(height: 20),
 
-          // Two-column layout for tablet
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Left Column - Contact Form
-              Expanded(
-                flex: 2,
-                child: AnimatedSection(
-                  id: 'contact-form-tablet',
-                  duration: const Duration(milliseconds: 1300),
-                  child: _buildContactForm(context),
+              Text(
+                'Have a project in mind, want to collaborate, or just say hello? Drop a message!',
+                style: GoogleFonts.inter(
+                  fontSize: isMobile ? 14 : 16,
+                  height: 1.6,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white.withOpacity(0.6)
+                      : Colors.black.withOpacity(0.6),
                 ),
-              ),
-              const SizedBox(width: 30),
-              // Right Column - Contact Info & Social
-              Expanded(
-                flex: 2,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AnimatedSection(
-                      id: 'contact-info-tablet',
-                      duration: const Duration(milliseconds: 1400),
-                      startOffset: 50,
-                      child: _buildContactInfo(context, userData, isMobile: false),
-                    ),
-                    const SizedBox(height: 30),
-                    AnimatedSection(
-                      id: 'contact-social-tablet',
-                      duration: const Duration(milliseconds: 1500),
-                      startOffset: 50,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Connect With Me',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).textTheme.displayMedium!.color,
-                            ),
-                          ),
-                          const SizedBox(height: 15),
-                          Wrap(
-                            spacing: 12,
-                            runSpacing: 12,
-                            children: socials.map((social) {
-                              return SocialButton(
-                                name: social['name'],
-                                url: social['url'],
-                                icon: social['icon'],
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              ).animate().fadeIn(duration: 500.ms, delay: 200.ms),
+
+              const SizedBox(height: 48),
+
+              // Responsive Two-Column Details & Form
+              Responsive.responsiveLayout(
+                mobile: _buildMobileLayout(context, userData, socials),
+                tablet: _buildDesktopLayout(context, userData, socials, isTablet: true),
+                desktop: _buildDesktopLayout(context, userData, socials, isTablet: false),
               ),
             ],
           ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildDesktopLayout(BuildContext context, Map<String, dynamic> userData, List<dynamic> socials) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 60),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AnimatedSection(
-            id: 'contact-title-desktop',
-            child: Text(
-              'Get In Touch',
-              style: Theme.of(context).textTheme.displayLarge!.copyWith(
-                fontSize: 40,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          const SizedBox(height: 15),
-          AnimatedSection(
-            id: 'contact-subtitle-desktop',
-            duration: const Duration(milliseconds: 1000),
-            child: Container(
-              height: 5,
-              width: 80,
-              decoration: BoxDecoration(
-                color: Theme.of(context).primaryColor,
-                borderRadius: BorderRadius.circular(2.5),
-              ),
-            ),
-          ),
-          const SizedBox(height: 20),
-          AnimatedSection(
-            id: 'contact-description-desktop',
-            duration: const Duration(milliseconds: 1100),
-            child: Text(
-              'Feel free to contact me for any work inquiries or collaborations.',
-              style: TextStyle(
-                fontSize: 18,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
-              ),
-            ),
-          ),
-          const SizedBox(height: 60),
-          Row(
+  Widget _buildMobileLayout(
+    BuildContext context, 
+    Map<String, dynamic> userData, 
+    List<dynamic> socials
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildContactInfo(context, userData),
+        const SizedBox(height: 24),
+        _buildSocialsSection(context, socials),
+        const SizedBox(height: 32),
+        _buildContactForm(context),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout(
+    BuildContext context, 
+    Map<String, dynamic> userData, 
+    List<dynamic> socials, 
+    {required bool isTablet}
+  ) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Left Column: Details & Socials
+        Expanded(
+          flex: 4,
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                flex: 5,
-                child: AnimatedSection(
-                  id: 'contact-form-desktop',
-                  duration: const Duration(milliseconds: 1300),
-                  child: _buildContactForm(context),
-                ),
-              ),
-              const SizedBox(width: 60),
-              Expanded(
-                flex: 4,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    AnimatedSection(
-                      id: 'contact-info-desktop',
-                      duration: const Duration(milliseconds: 1400),
-                      startOffset: 100,
-                      child: _buildContactInfo(context, userData, isMobile: false),
-                    ),
-                    const SizedBox(height: 40),
-                    AnimatedSection(
-                      id: 'contact-social-desktop',
-                      duration: const Duration(milliseconds: 1600),
-                      startOffset: 100,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Connect With Me',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                              color: Theme.of(context).textTheme.displayMedium!.color,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Wrap(
-                            spacing: 15,
-                            runSpacing: 15,
-                            children: socials.map((social) {
-                              return SocialButton(
-                                name: social['name'],
-                                url: social['url'],
-                                icon: social['icon'],
-                              );
-                            }).toList(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              _buildContactInfo(context, userData),
+              const SizedBox(height: 28),
+              _buildSocialsSection(context, socials),
             ],
           ),
-        ],
-      ),
+        ),
+        
+        SizedBox(width: isTablet ? 32 : 54),
+        
+        // Right Column: Form
+        Expanded(
+          flex: 6,
+          child: _buildContactForm(context),
+        ),
+      ],
     );
   }
 
-  Widget _buildContactInfo(BuildContext context, Map<String, dynamic> userData, {required bool isMobile}) {
+  Widget _buildContactInfo(BuildContext context, Map<String, dynamic> userData) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final infoBg = isDark 
+        ? Colors.white.withOpacity(0.04) 
+        : Colors.black.withOpacity(0.03);
+
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(isMobile ? 20 : 30),
+      padding: const EdgeInsets.all(28),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.background,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
+        color: infoBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08),
+          width: 1.5,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Contact Information',
-            style: TextStyle(
-              fontSize: isMobile ? 18 : 22,
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).textTheme.displayMedium!.color,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : Colors.black,
             ),
           ),
-          const SizedBox(height: 20),
-          _buildContactItem(
-            context,
-            icon: Icons.email,
-            title: 'Email',
-            value: userData['email'],
-          ),
-          const SizedBox(height: 15),
-          _buildContactItem(
-            context,
-            icon: Icons.phone,
-            title: 'Phone',
-            value: userData['phone'],
-          ),
-          const SizedBox(height: 15),
-          _buildContactItem(
-            context,
-            icon: Icons.location_on,
-            title: 'Location',
-            value: userData['location'],
-          ),
+          const SizedBox(height: 24),
+          _buildInfoItem(context, Icons.email_outlined, 'Email Address', userData['email']),
+          const SizedBox(height: 18),
+          _buildInfoItem(context, Icons.phone_outlined, 'Phone Number', userData['phone']),
+          const SizedBox(height: 18),
+          _buildInfoItem(context, Icons.location_on_outlined, 'Location', userData['location']),
         ],
       ),
-    );
+    ).animate().fadeIn(duration: 500.ms, delay: 300.ms);
   }
 
-  Widget _buildContactItem(
-      BuildContext context, {
-        required IconData icon,
-        required String title,
-        required String value,
-      }) {
+  Widget _buildInfoItem(BuildContext context, IconData icon, String label, String value) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Theme.of(context).primaryColor.withOpacity(0.1),
+            color: theme.primaryColor.withOpacity(0.08),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Icon(
             icon,
-            color: Theme.of(context).primaryColor,
+            color: theme.primaryColor,
             size: 20,
           ),
         ),
-        const SizedBox(width: 15),
+        const SizedBox(width: 16),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).textTheme.bodyMedium!.color!.withOpacity(0.7),
+                label,
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  color: isDark ? Colors.white.withOpacity(0.4) : Colors.black.withOpacity(0.4),
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 value,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Theme.of(context).textTheme.bodyLarge!.color,
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black,
                 ),
               ),
             ],
@@ -435,19 +239,53 @@ class _ContactScreenState extends State<ContactScreen> {
     );
   }
 
-  Widget _buildContactForm(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(30),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.background,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+  Widget _buildSocialsSection(BuildContext context, List<dynamic> socials) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Connect on Social Media',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color: isDark ? Colors.white : Colors.black,
           ),
-        ],
+        ),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: socials.map((social) {
+            return SocialButton(
+              name: social['name'],
+              url: social['url'],
+              icon: social['icon'],
+            );
+          }).toList(),
+        ),
+      ],
+    ).animate().fadeIn(duration: 500.ms, delay: 400.ms);
+  }
+
+  Widget _buildContactForm(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final formBg = isDark 
+        ? Colors.white.withOpacity(0.04) 
+        : Colors.black.withOpacity(0.03);
+
+    return Container(
+      padding: const EdgeInsets.all(28),
+      decoration: BoxDecoration(
+        color: formBg,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08),
+          width: 1.5,
+        ),
       ),
       child: Form(
         key: _formKey,
@@ -455,153 +293,120 @@ class _ContactScreenState extends State<ContactScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Send Me a Message',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.displayMedium!.color,
+              'Send a Message',
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: isDark ? Colors.white : Colors.black,
               ),
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 24),
+            
+            // Name Field
             _buildTextFormField(
               controller: _nameController,
               label: 'Your Name',
-              icon: Icons.person,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your name';
-                }
-                return null;
-              },
+              icon: Icons.person_outline_rounded,
+              validator: (val) => val == null || val.isEmpty ? 'Please enter your name' : null,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // Email Field
             _buildTextFormField(
               controller: _emailController,
               label: 'Your Email',
-              icon: Icons.email,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your email';
-                }
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+              icon: Icons.mail_outline_rounded,
+              validator: (val) {
+                if (val == null || val.isEmpty) return 'Please enter your email';
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)) {
                   return 'Please enter a valid email';
                 }
                 return null;
               },
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
+
+            // Message Field
             _buildTextFormField(
               controller: _messageController,
               label: 'Your Message',
-              icon: Icons.message,
+              icon: Icons.chat_bubble_outline_rounded,
               maxLines: 5,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your message';
-                }
-                return null;
-              },
+              validator: (val) => val == null || val.isEmpty ? 'Please enter your message' : null,
             ),
-            const SizedBox(height: 30),
+            const SizedBox(height: 24),
+
+            // Submit Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isSending
-                    ? null
-                    : () {
-                  if (_formKey.currentState!.validate()) {
-                    _handleSubmit();
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
+                onPressed: _isSending ? null : _handleSubmit,
                 child: _isSending
                     ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 2,
-                  ),
-                )
-                    : const Text(
-                  'Send Message',
-                  style: TextStyle(fontSize: 16),
-                ),
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text('Send Message'),
               ),
             ),
           ],
         ),
       ),
-    );
+    ).animate().fadeIn(duration: 500.ms, delay: 350.ms);
   }
 
   Widget _buildTextFormField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
-    required String? Function(String?)? validator,
+    required String? Function(String?) validator,
     int maxLines = 1,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return TextFormField(
       controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Theme.of(context).dividerColor,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Theme.of(context).dividerColor,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Theme.of(context).primaryColor,
-            width: 2,
-          ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.error,
-          ),
-        ),
-        filled: true,
-        fillColor: Theme.of(context).scaffoldBackgroundColor,
-      ),
       maxLines: maxLines,
       validator: validator,
+      style: GoogleFonts.inter(
+        fontSize: 14,
+        color: isDark ? Colors.white : Colors.black,
+      ),
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: GoogleFonts.plusJakartaSans(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: isDark ? Colors.white.withOpacity(0.5) : Colors.black.withOpacity(0.5),
+        ),
+        prefixIcon: Icon(icon, size: 20, color: theme.primaryColor.withOpacity(0.6)),
+        filled: true,
+        fillColor: isDark ? Colors.black.withOpacity(0.2) : Colors.white.withOpacity(0.4),
+      ),
     );
   }
 
   void _handleSubmit() {
-    setState(() {
-      _isSending = true;
-    });
+    if (!_formKey.currentState!.validate()) return;
 
-    // Simulate form submission
-    Future.delayed(const Duration(seconds: 2), () {
+    setState(() => _isSending = true);
+
+    Future.delayed(const Duration(milliseconds: 1500), () {
       if (mounted) {
-        setState(() {
-          _isSending = false;
-        });
-
-        // Show success message
+        setState(() => _isSending = false);
+        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text('Message sent successfully!'),
-            backgroundColor: Colors.green,
+            content: Text(
+              'Message sent successfully!',
+              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+            ),
+            backgroundColor: Colors.green.shade600,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -609,7 +414,6 @@ class _ContactScreenState extends State<ContactScreen> {
           ),
         );
 
-        // Clear form
         _nameController.clear();
         _emailController.clear();
         _messageController.clear();

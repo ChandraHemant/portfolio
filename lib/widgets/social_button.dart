@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
@@ -29,13 +30,13 @@ class _SocialButtonState extends State<SocialButton> with SingleTickerProviderSt
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 200),
+      duration: const Duration(milliseconds: 180),
       vsync: this,
     );
 
     _scaleAnimation = Tween<double>(
       begin: 1.0,
-      end: 1.05,
+      end: 1.04,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
   }
 
@@ -52,12 +53,21 @@ class _SocialButtonState extends State<SocialButton> with SingleTickerProviderSt
         throw Exception('Could not launch ${widget.url}');
       }
     } catch (e) {
-      print('Error launching URL: $e');
+      debugPrint('Error launching URL: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final baseBg = isDark 
+        ? Colors.white.withOpacity(0.04) 
+        : Colors.black.withOpacity(0.03);
+    
+    final hoverBg = theme.primaryColor;
+
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
@@ -74,27 +84,25 @@ class _SocialButtonState extends State<SocialButton> with SingleTickerProviderSt
             },
             child: GestureDetector(
               onTap: _launchUrl,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 decoration: BoxDecoration(
-                  color: _isHovered
-                      ? Theme.of(context).primaryColor
-                      : Theme.of(context).colorScheme.background,
-                  borderRadius: BorderRadius.circular(40),
+                  color: _isHovered ? hoverBg : baseBg,
+                  borderRadius: BorderRadius.circular(30),
                   boxShadow: [
                     BoxShadow(
                       color: _isHovered
-                          ? Theme.of(context).primaryColor.withOpacity(0.4)
-                          : Colors.black.withOpacity(0.07),
-                      blurRadius: 12,
-                      offset: const Offset(0, 5),
-                      spreadRadius: _isHovered ? 0 : -2,
+                          ? theme.primaryColor.withOpacity(0.3)
+                          : Colors.black.withOpacity(0.02),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
                     ),
                   ],
                   border: Border.all(
                     color: _isHovered
                         ? Colors.transparent
-                        : Theme.of(context).dividerColor.withOpacity(0.3),
+                        : (isDark ? Colors.white.withOpacity(0.08) : Colors.black.withOpacity(0.08)),
                     width: 1.5,
                   ),
                 ),
@@ -105,27 +113,25 @@ class _SocialButtonState extends State<SocialButton> with SingleTickerProviderSt
                       _getIconData(widget.icon),
                       color: _isHovered
                           ? Colors.white
-                          : Theme.of(context).primaryColor,
-                      size: 20,
+                          : theme.primaryColor,
+                      size: 18,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 10),
                     Text(
                       widget.name,
-                      style: TextStyle(
+                      style: GoogleFonts.plusJakartaSans(
                         color: _isHovered
                             ? Colors.white
-                            : Theme.of(context).textTheme.bodyLarge!.color,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
+                            : (isDark ? Colors.white.withOpacity(0.8) : Colors.black.withOpacity(0.8)),
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
                       ),
                     ),
                   ],
                 ),
               ),
             ),
-          ).animate(delay: Duration(milliseconds: widget.index * 100))
-              .fadeIn(duration: 400.ms)
-              .slide(begin: const Offset(0, 0.2), duration: 400.ms),
+          ),
         );
       },
     );
@@ -134,19 +140,19 @@ class _SocialButtonState extends State<SocialButton> with SingleTickerProviderSt
   IconData _getIconData(String iconName) {
     switch (iconName.toLowerCase()) {
       case 'linkedin':
-        return Icons.attach_file;
-      case 'github':
-        return Icons.code;
-      case 'twitter':
-        return Icons.flutter_dash;
-      case 'flutter':
-        return Icons.flutter_dash;
-      case 'php':
-        return Icons.php;
-      case 'web':
-        return Icons.language;
-      default:
         return Icons.link;
+      case 'github':
+        return Icons.code_rounded;
+      case 'twitter':
+        return Icons.flutter_dash_rounded;
+      case 'flutter':
+        return Icons.flutter_dash_rounded;
+      case 'php':
+        return Icons.terminal_rounded;
+      case 'web':
+        return Icons.language_rounded;
+      default:
+        return Icons.link_rounded;
     }
   }
 }
