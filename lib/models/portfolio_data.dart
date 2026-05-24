@@ -4,7 +4,7 @@ class PortfolioData {
     "title": "Full Stack Developer",
     "about": "Passionate Full Stack and Geospatial (GIS) Developer with 5+ years of professional experience architecting robust web & mobile systems. Currently deputed at CHiPS (Chhattisgarh Infotech Promotion Society) in Nava Raipur, I have designed and deployed over 15+ mission-critical GIS portals, cross-platform Flutter applications, and high-throughput Node.js/Laravel APIs. Specializing in integrating interactive mapping engines like OpenLayers and Leaflet with PostGIS and PostgreSQL backends, I thrive on turning complex geospatial datasets and offline-first mobile challenges into elegant, highly performant, and user-centric solutions.",
     "avatarUrl": "assets/images/my_pic.png",
-    "email": "hemantchandra242@gmail.com",
+    "email": "info@hemantchandra.com",
     "phone": "+91 8839105236",
     "location": "Raipur, Chhattisgarh, India",
     "socials": [

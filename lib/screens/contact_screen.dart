@@ -4,6 +4,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:portfolio_app/config/responsive.dart';
 import 'package:portfolio_app/models/portfolio_data.dart';
 import 'package:portfolio_app/widgets/social_button.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ContactScreen extends StatefulWidget {
   final ScrollController? scrollController;
@@ -391,33 +392,78 @@ class _ContactScreenState extends State<ContactScreen> {
     );
   }
 
-  void _handleSubmit() {
+  void _handleSubmit() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSending = true);
 
-    Future.delayed(const Duration(milliseconds: 1500), () {
+    final name = _nameController.text;
+    final email = _emailController.text;
+    final message = _messageController.text;
+
+    // Construct the email body
+    final String emailBody = 'Name: $name\nEmail: $email\n\nMessage:\n$message';
+    final Uri mailUri = Uri(
+      scheme: 'mailto',
+      path: 'info@hemantchandra.com',
+      query: 'subject=Portfolio Contact from $name&body=${Uri.encodeComponent(emailBody)}',
+    );
+
+    // Construct the WhatsApp URL as a fallback
+    final String whatsappBody = 'Hello Hemant,\n\nI am contacting you from your portfolio website.\n\nName: $name\nEmail: $email\n\nMessage:\n$message';
+    final Uri whatsappUri = Uri.parse('https://wa.me/918839105236?text=${Uri.encodeComponent(whatsappBody)}');
+
+    bool mailLaunched = false;
+    try {
+      mailLaunched = await launchUrl(mailUri);
+    } catch (e) {
+      mailLaunched = false;
+    }
+
+    setState(() => _isSending = false);
+
+    if (mailLaunched) {
+      // If mail client successfully opened, we can't detect if they sent it or cancelled.
+      // So we show a snackbar offering WhatsApp just in case they cancelled.
       if (mounted) {
-        setState(() => _isSending = false);
-        
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Message sent successfully!',
-              style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+              'Opening email client... If it didn\'t work or you didn\'t send it, you can use WhatsApp instead.',
+              style: GoogleFonts.plusJakartaSans(),
             ),
-            backgroundColor: Colors.green.shade600,
+            backgroundColor: Theme.of(context).primaryColor,
+            duration: const Duration(seconds: 10),
             behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+            action: SnackBarAction(
+              label: 'Open WhatsApp',
+              textColor: Colors.white,
+              onPressed: () {
+                launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+              },
             ),
           ),
         );
-
         _nameController.clear();
         _emailController.clear();
         _messageController.clear();
       }
-    });
+    } else {
+      // If mailto: failed entirely (e.g. no mail app installed), immediately open WhatsApp
+      try {
+        await launchUrl(whatsappUri, mode: LaunchMode.externalApplication);
+        if (mounted) {
+          _nameController.clear();
+          _emailController.clear();
+          _messageController.clear();
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not open email or WhatsApp. Please contact via phone.')),
+          );
+        }
+      }
+    }
   }
 }
